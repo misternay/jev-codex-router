@@ -7,10 +7,22 @@ artifact, package-manager indirection, or clone under `~/.local/share`.
 ## Imported snapshot
 
 - Upstream project: `duolahypercho/codex-router`
-- Upstream base: `9c0db45679f64640402bb5bba19705b0cb15c898`
+- Upstream base: `9c0db45676238d032757370ec4010b66b6759dd8`
 - Integrated fork snapshot: `576dba20f02d97822a8170eccf09bb484a6db273`
 - Imported: 2026-09-21
 - License: MIT, retained at `router/LICENSE`
+
+## GitHub fork and upstream merge
+
+- GitHub fork: `https://github.com/misternay/codex-router`
+- Jev integration branch: `jev-integration`
+- Jev integration merge: `65a89a8b` (upstream `main` at `6279f39d`)
+- Merged into this embedded directory: 2026-09-25
+
+The integration branch preserves the original fork ancestry, carries the
+committed `router/` changes from this project, and merges upstream `main`.
+The embedded directory is a copy of that branch's tree. Continue upstream
+work in the GitHub fork and copy reviewed merges into `router/` deliberately.
 
 The snapshot includes the local fork changes that preserve complete canonical
 replay for `jev/auto`, keep its prompt-cache identity, carry the routed reasoning
