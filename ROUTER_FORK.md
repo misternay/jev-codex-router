@@ -15,7 +15,7 @@ artifact, package-manager indirection, or clone under `~/.local/share`.
 ## GitHub fork and upstream merge
 
 - GitHub fork: `https://github.com/misternay/codex-router`
-- Jev integration branch: `jev-integration`
+- Jev integration branch: `jev-integration` (also the fork's `main`)
 - Jev integration merge: `65a89a8b` (upstream `main` at `6279f39d`)
 - Merged into this embedded directory: 2026-09-25
 
