@@ -4,6 +4,9 @@
 a regular, versioned directory in this repository — not a submodule, generated
 artifact, package-manager indirection, or clone under `~/.local/share`.
 
+The Jev monorepo is maintained at `https://github.com/misternay/jev-codex-router`.
+Its source repository, `0xNatoshi/jev-codex-router`, is archived and read-only.
+
 ## Imported snapshot
 
 - Upstream project: `duolahypercho/codex-router`
