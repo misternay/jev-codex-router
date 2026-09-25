@@ -17,6 +17,7 @@ artifact, package-manager indirection, or clone under `~/.local/share`.
 - GitHub fork: `https://github.com/misternay/codex-router`
 - Jev integration branch: `jev-integration` (also the fork's `main`)
 - Jev integration merge: `65a89a8b` (upstream `main` at `6279f39d`)
+- Current fork revision: `bac46b24322cda609abd9aa3202770e1756824b3`
 - Merged into this embedded directory: 2026-09-25
 
 The integration branch preserves the original fork ancestry, carries the
