@@ -5,10 +5,12 @@ Replays real turns from the last N days:
   - real tokens per turn   (token_usage_record → turn_token_usage)
   - real model per session (thread_settings_applied)
   - Jev route per turn     (tier + depth → luna/sol/astra policy)
-and compares the "API-equivalent" cost of both scenarios at published prices
-(short context, Sep 2026):
+and compares the "API-equivalent" cost of both scenarios at current published
+short-context GPT-6 prices (Sep 24, 2026):
 
-  astra $10/$50 · sol $4/$20 · terra $2/$12 · luna $0.20/$1.20 (standard speed)
+  astra $10/$50 · sol $2/$10 · luna $0.10/$0.50 (standard speed)
+
+The historical result in BACKTEST.md uses the older GPT-5.6 ladder and rates.
 
 Usage: python3 backtest_savings.py [--days 7] [--limit-unique 300]
 """
@@ -25,9 +27,13 @@ _spec.loader.exec_module(poc)
 SESS_ROOT = os.path.expanduser("~/.codex/sessions")
 RESULT_PATH = os.path.expanduser("~/.codex/codex-router/jev-backtest.json")
 
-# Prices per 1M tokens (short context, OpenAI API page, Sep 2026)
+# Prices per 1M tokens (short context, as of 2026-09-24):
+# https://developers.openai.com/api/docs/pricing
 PRICES = {
     "gpt-6-astra":   (10.00, 50.00, 1.00, 12.50),   # (input, output, cached_in, cache_write)
+    "gpt-6-sol":     (2.00, 10.00, 0.20, 2.50),
+    "gpt-6-luna":    (0.10, 0.50, 0.01, 0.125),
+    # Kept for archived GPT-5.6 results and old cached records.
     "gpt-5.6-sol":   (4.00, 20.00, 0.40, 5.00),
     "gpt-5.6-terra": (2.00, 12.00, 0.20, 2.50),
     "gpt-5.6-luna":  (0.20, 1.20, 0.02, 0.25),
@@ -232,7 +238,7 @@ def main():
         f"{k.split('/')[-1]} ${v:.0f}" for k, v in sorted(scen.items(), key=lambda x: x[1])))
     print(f"full-Astra baseline: ${astra_all:.0f} (fixed token volume; not measured quota)")
     print("-" * 72)
-    for k in ("gpt-5.6-luna", "gpt-5.6-sol", "gpt-6-astra"):
+    for k in ("gpt-6-luna", "gpt-6-sol", "gpt-6-astra"):
         print(f"  {k:<14} {dist_counts.get(k,0):>4} turns · ${dist_costs.get(k,0):.2f}")
     print(f"result: {RESULT_PATH}")
     return 0

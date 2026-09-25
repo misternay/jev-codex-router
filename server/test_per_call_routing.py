@@ -239,7 +239,7 @@ class PerCallEndToEnd(unittest.TestCase):
         choices = [
             answer(jev.LUNA, "low"),
             answer(jev.SOL, "high"),
-            answer(jev.TERRA, "medium"),
+            answer(jev.LUNA, "medium"),
             answer(jev.ASTRA, "xhigh"),
         ]
         with mock.patch.object(jev, "call_jev_routed", side_effect=choices) as judge:
@@ -250,7 +250,7 @@ class PerCallEndToEnd(unittest.TestCase):
         self.assertEqual(judge.call_count, 4)
         self.assertEqual(
             [p["model"] for p in Edge.payloads],
-            [jev.LUNA, jev.SOL, jev.TERRA, jev.ASTRA],
+            [jev.LUNA, jev.SOL, jev.LUNA, jev.ASTRA],
         )
         self.assertEqual([r["routing_scope"] for r in self.records], ["one_call"] * 4)
         self.assertEqual(len({r["cache_scope"] for r in self.records}), 1)
@@ -309,7 +309,7 @@ class PerCallEndToEnd(unittest.TestCase):
             jev, "call_jev_routed",
             side_effect=[
                 answer(jev.SOL, "medium", lease="user_turn"),
-                answer(jev.TERRA, "medium", lease="user_turn"),
+                answer(jev.LUNA, "medium", lease="user_turn"),
                 answer(jev.LUNA, "low"),
             ],
         ) as judge:
@@ -384,21 +384,21 @@ class PerCallEndToEnd(unittest.TestCase):
         with mock.patch.object(
             jev,
             "call_jev_routed",
-            return_value=answer(jev.TERRA, "high", astra_required=True),
+            return_value=answer(jev.SOL, "high", astra_required=True),
         ):
             self.call(sent)
         self.assertEqual(Edge.payloads[-1]["model"], jev.ASTRA)
         self.assertEqual(Edge.payloads[-1]["input"], history)
         self.assertEqual(self.records[-1]["gate"], "astra_policy")
-        self.assertEqual(self.records[-1]["base_tier"], jev.TERRA)
+        self.assertEqual(self.records[-1]["base_tier"], jev.SOL)
 
     def test_checkpoint_then_final_review_then_fix_routes_each_phase(self):
         # Stubbed semantic decisions test wiring, not Jev classification accuracy.
         history = [message("user", "Implement the change, then get an independent final review.")]
         phases = [
-            ("Run an in-progress quality checkpoint.", answer(jev.TERRA, "medium")),
+            ("Run an in-progress quality checkpoint.", answer(jev.SOL, "medium")),
             ("Scores look good; independent final review is still required.",
-             answer(jev.TERRA, "high", astra_required=True)),
+             answer(jev.SOL, "high", astra_required=True)),
             ("Final review complete. Fix its established finding.",
              answer(jev.SOL, "high")),
         ]
@@ -411,7 +411,7 @@ class PerCallEndToEnd(unittest.TestCase):
                 self.assertEqual(Edge.payloads[-1]["input"], history)
         self.assertEqual(judge.call_count, 3)
         self.assertEqual(
-            [p["model"] for p in Edge.payloads], [jev.TERRA, jev.ASTRA, jev.SOL]
+            [p["model"] for p in Edge.payloads], [jev.SOL, jev.ASTRA, jev.SOL]
         )
         self.assertEqual(
             [r["gate"] for r in self.records], ["apply", "astra_policy", "apply"]

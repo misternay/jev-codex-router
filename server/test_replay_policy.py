@@ -54,8 +54,8 @@ class ReplayPolicy(unittest.TestCase):
             data = json.loads(result.read_text())
             self.assertEqual(data["turns"], 1)
             self.assertEqual(data["skipped_turns"], 1)
-            self.assertEqual(data["jev_usd"], 0.2)
-            self.assertEqual(data["scenarios_usd"][routing_policy.SOL], 4.0)
+            self.assertEqual(data["jev_usd"], 0.1)
+            self.assertEqual(data["scenarios_usd"][routing_policy.SOL], 2.0)
             self.assertEqual(data["policy_version"], routing_policy.POLICY_VERSION)
 
     def test_identical_short_replies_do_not_share_different_contexts(self):
@@ -84,7 +84,7 @@ class ReplayPolicy(unittest.TestCase):
             data = json.loads(result.read_text())
             self.assertEqual(data["actual_models"],
                              {routing_policy.SOL: 1, routing_policy.LUNA: 1})
-            self.assertEqual(data["actual_usd"], 4.2)
+            self.assertEqual(data["actual_usd"], 2.1)
 
     def test_shadow_uses_live_projection_and_retains_short_confirmations(self):
         spec = importlib.util.spec_from_file_location(

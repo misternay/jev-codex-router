@@ -36,7 +36,7 @@ Codex ──▶ Codex Router (:4202)
                             │
                             └─ canonical Codex replay + decision
                                └─▶ local caller edge (shared native session)
-                                    └─▶ luna / terra / sol / astra
+                                    └─▶ gpt-6-luna / gpt-6-sol / gpt-6-astra
 ```
 
 - **Responses in, Responses out** — no format conversion; the SSE stream is
@@ -60,8 +60,9 @@ Codex ──▶ Codex Router (:4202)
 
 The shared contract in `server/routing_policy.py` gives Jev four independent
 Choice questions in one request: whether the next call falls under the mandatory
-Astra policy, the least expensive sufficient capability tier (Luna, Terra, Sol or
-Astra), the minimum sufficient thinking depth (low through max), and a bounded
+Astra policy, the least expensive sufficient capability tier (GPT-6 Luna, Sol or
+Astra), the reasoning effort (low through max; ordinary work on Luna defaults to
+max), and a bounded
 route lease (`one_call`, `tool_chain` or `user_turn`). The first
 choice covers project architecture, independent final code review and risk-focused
 review (security, auth/permissions, concurrency, migrations, public API compatibility
@@ -79,16 +80,19 @@ unchanged even when options are close. Jev's conservative combined confidence
 and all four choice distributions are logged separately; neither is a measured
 probability that the selected model will successfully finish the task.
 
-The native ladder is Luna → Terra → Sol → Astra. Terra covers routine bounded
-implementation with clear requirements, small local features, known-cause fixes
-and straightforward tests; Sol covers complex implementation and cross-file
-reasoning. These profiles are routing priors, not measured capability guarantees.
-Terra attempts are counted as native in reports; its ChatGPT credit estimate
-remains unknown until a verified credit rate is configured.
+The current native ladder is GPT-6 Luna → GPT-6 Sol → GPT-6 Astra. Ordinary
+general work defaults to Luna at max reasoning effort; explicit fixed mechanical
+work can use lower effort. Sol handles complex coding or agentic work that needs
+more capability than Luna; Astra is reserved for the hardest work and mandatory
+risk reviews. These profiles are routing priors, not measured capability
+guarantees. GPT-5.6
+models, including Terra, remain recognizable in historical reports but are no
+longer offered as current Jev choices.
 
-Policy `split-v11-native-first-fallback` judges remaining work rather than inheriting a
-completed review's category. Explicit mechanical follow-through can use Luna;
-implied intent, underspecified goals and autonomous investigation favor Sol.
+Policy `split-v13-luna-max-general` judges remaining work rather than inheriting
+a completed review's category. Ordinary general work defaults to Luna at max effort;
+complex coding and agentic work that needs greater capability favor Sol. Implied intent
+alone does not require Sol.
 The objective includes correction and clarification costs. There is no
 keyword-based override or automatic model floor on conversation openings.
 Short asks receive a bounded preceding task and assistant proposal without a
@@ -188,12 +192,13 @@ python3 server/report_routing.py --days 7 --policy current  # current policy onl
 python3 server/report_routing.py --days 30 --json            # all versions, JSON
 ```
 
-It prints the served model distribution (luna/terra/sol/astra, plus the Codex-dry
-external fallback when it took over: turns + %), the share of turns served by the cheapest
+It prints the served model distribution (current GPT-6 Luna/Sol/Astra, historical
+GPT-5.6 models, and the Codex-dry external fallback when it took over: turns + %),
+the share of turns served by the cheapest
 tier, the share of turns held below the confidence gate, the gates encountered,
 median latency (end-to-end and Jev's own decision time), observed prompt-cache
 reads by model and hashed session, and an estimate of the real cost against two
-counterfactuals — every turn on `gpt-6-astra`, and every turn on `gpt-5.6-sol`.
+counterfactuals — every turn on `gpt-6-astra`, and every turn on `gpt-6-sol`.
 
 New log entries record a versioned decision and each upstream attempt's model,
 effort, standard speed, terminal event and token usage when the provider reports
@@ -379,12 +384,12 @@ per-call attribution are excluded from the historical cost baseline.
 | Action | Command |
 |---|---|
 | Watch decisions | `tail -f ~/.codex/codex-router/jev-router-live.jsonl` |
-| See the picked model in the thread | every reasoning summary part carries the routed tag, separators on both sides: ` · 🧠sol:low · ` — one glyph per route: ⚡ luna (economical) · 🧠 sol (workhorse) · 🚀 astra (frontier) · 🌍 terra; external fallbacks show their own route |
+| See the picked model in the thread | every reasoning summary part carries the routed tag, separators on both sides: ` · 🧠sol:low · ` — one glyph per route: ⚡ GPT-6 Luna (efficient) · 🧠 GPT-6 Sol (coding workhorse) · 🚀 GPT-6 Astra (frontier); external fallbacks show their own route |
 | Show the model and thinking above every assistant message | `touch ~/.codex/codex-router/jev-router.signature` — a leading `**🧠 sol · thinking: high**` appears from the first text fragment, including commentary and unphased replies; remove the file to disable |
 | Shadow mode (decide + log, serve astra) | `touch ~/.codex/codex-router/jev-router.shadow` |
 | Debug counters (no raw content) | `touch ~/.codex/codex-router/jev-router.debug` |
 | Kill switch (no Jev → frontier) | `touch ~/.codex/codex-router/jev-router.off` (delete the file to re-enable) |
-| Force the Codex-dry fallback | `touch ~/.codex/codex-router/jev-router.codex-dry` (delete the file to return to luna/terra/sol/astra) |
+| Force the Codex-dry fallback | `touch ~/.codex/codex-router/jev-router.codex-dry` (delete the file to return to GPT-6 luna/sol/astra) |
 | Inspect the dry auto state | `cat ~/.codex/codex-router/jev-router.codex-dry.json` (reason + expiry; auto-cleared by the next successful native call) |
 | Update the complete monorepo | `bin/jev-codex-router update` |
 | Hide the model | `router/bin/control picker set jev/auto hide` |

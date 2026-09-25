@@ -7,14 +7,14 @@ import report_routing as report
 
 
 class Usage(unittest.TestCase):
-    def test_terra_attempt_is_native_but_unverified_credit_rate_stays_unknown(self):
+    def test_legacy_terra_attempt_uses_its_historical_credit_rate(self):
         result = report.measured_usage([{"attempts": [{
-            "model": j.TERRA, "speed": "default",
+            "model": "gpt-5.6-terra", "speed": "default",
             "usage": {"input_tokens": 1000, "cached_input_tokens": 500, "output_tokens": 10},
         }]}])
         self.assertEqual(result["native_attempts"], 1)
-        self.assertEqual(result["unknown_attempts"], 1)
-        self.assertEqual(result["priced_attempts"], 0)
+        self.assertEqual(result["unknown_attempts"], 0)
+        self.assertEqual(result["priced_attempts"], 1)
 
     def test_fragmented_terminal_event_captures_only_token_counters(self):
         raw_usage = {"input_tokens": 1000, "output_tokens": 120, "total_tokens": 1120,
@@ -41,8 +41,8 @@ class Usage(unittest.TestCase):
     def test_reasoning_is_not_billed_twice(self):
         usage = {"input_tokens": 1_000_000, "cached_input_tokens": 800_000,
                  "output_tokens": 100_000, "reasoning_tokens": 90_000}
-        self.assertEqual(report.token_credits(j.SOL, usage), 78.0)
-        self.assertEqual(report.token_credits(j.LUNA, usage), 4.4)
+        self.assertEqual(report.token_credits(j.SOL, usage), 39.0)
+        self.assertEqual(report.token_credits(j.LUNA, usage), 1.95)
 
     def test_retries_count_and_external_fallback_does_not_inflate_native_savings(self):
         usage = {"input_tokens": 1_000_000, "cached_input_tokens": 0, "output_tokens": 0}
@@ -57,8 +57,8 @@ class Usage(unittest.TestCase):
         self.assertEqual(result["priced_attempts"], 2)
         self.assertEqual(result["unknown_attempts"], 1)
         self.assertEqual(result["legacy_calls_without_attempts"], 1)
-        self.assertEqual(result["routed_credits"], 105.0)
-        self.assertEqual(result["all_sol_credits"], 200.0)
+        self.assertEqual(result["routed_credits"], 52.5)
+        self.assertEqual(result["all_sol_credits"], 100.0)
         self.assertEqual(result["all_astra_credits"], 500.0)
 
     def test_historical_fast_calls_keep_their_api_surcharge(self):

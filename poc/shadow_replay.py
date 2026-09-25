@@ -213,7 +213,7 @@ def main():
                 else:
                     print(f"[jev-shadow] ERROR task {i}: {e}", file=sys.stderr)
 
-    print(f"[jev-shadow] +{len(tasks)} routes | luna {dist.get('gpt-5.6-luna', 0)} · sol {dist.get('gpt-5.6-sol', 0)} · astra {dist.get('gpt-6-astra', 0)} | holds {holds} | err {errors} | {n_tok} tok | {ts}")
+    print(f"[jev-shadow] +{len(tasks)} routes | luna {dist.get('gpt-6-luna', 0)} · sol {dist.get('gpt-6-sol', 0)} · astra {dist.get('gpt-6-astra', 0)} | holds {holds} | err {errors} | {n_tok} tok | {ts}")
     if not args.quiet:
         actual = summarize_actual(args.days)
         if actual:

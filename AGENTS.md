@@ -112,8 +112,8 @@ tail -1 ~/.codex/codex-router/jev-router-live.jsonl
   (`router/bin/control failover qualify <local-model-slug>`).
   `JEV_FALLBACK_STANDARD` / `JEV_FALLBACK_FRONTIER` remain optional static
   overrides; retries never repeat an identical target.
-  Remove the file to return to the
-  luna/terra/sol/astra native model ladder. An automatic flip (429 / usage-limit response) also
+  Remove the file to return to the GPT-6 Luna/Sol/Astra native model ladder. An automatic
+  flip (429 / usage-limit response) also
   retries the failed call on the discovered fallback, then lasts until the instant the edge
   announced for the window reset (30 minutes when the refusal announces none,
   one week at most) — `cat ~/.codex/codex-router/jev-router.codex-dry.json`
@@ -162,7 +162,7 @@ tail -1 ~/.codex/codex-router/jev-router-live.jsonl
 
 ## Latency & cost notes
 
-- The current policy is `split-v11-native-first-fallback`: one System One request asks
+- The current policy is `split-v13-luna-max-general`: one System One request asks
   four independent Choice questions with explicit criteria — mandatory Astra
   policy, capability tier, reasoning effort and a bounded route lease. New user
   turns, errors, compactions and changed tool chains are always re-evaluated;
@@ -177,7 +177,9 @@ tail -1 ~/.codex/codex-router/jev-router-live.jsonl
   Provider retries inside one
   call keep that decision.
   Routine in-progress quality checkpoints, score comparisons and fixes to established
-  findings use normal routing. Good scores never waive a required final/risk review.
+  findings use normal routing. The current GPT-6 ladder is Luna, Sol and Astra; older
+  GPT-5.6 entries remain supported only for historical reporting. Good scores never
+  waive a required final/risk review.
   The router does not run `jev-review` or create an independent reviewer; quality
   scoring and blind reviewer context must be handled by the calling workflow.
   The selected model always receives the complete canonical request and the
@@ -187,17 +189,20 @@ tail -1 ~/.codex/codex-router/jev-router-live.jsonl
   context-dependent short ask also gets one bounded active-task summary. Cache
   hits are a cost optimization, never the carrier of conversation continuity:
   reuse is measured per `(hashed session, model)`, while every model swap still
-  gets the full replay. All tiers use adaptive effort and standard speed; never
-  force Luna to max or enable Fast mode.
+  gets the full replay. Ordinary general work defaults to Luna at max effort;
+  explicit fixed mechanical work may use lower effort. Sol and Astra use adaptive
+  effort appropriate to the remaining work. All routes use standard speed; never
+  enable Fast mode.
 - Apart from the explicit mandatory-Astra policy, no scenario override, target
   model share, or confidence threshold may replace a valid Jev choice. Confidence
-  is diagnostic. The native ladder is Luna → Terra → Sol → Astra. Terra covers
-  routine bounded implementation with clear requirements; Sol covers complex
-  implementation and cross-file reasoning. Mandatory Astra categories still win.
+  is diagnostic. The current native ladder is GPT-6 Luna → Sol → Astra. Luna is
+  the default for ordinary general work at max effort; explicit fixed mechanical
+  work may use lower effort. Sol covers complex coding or agentic tasks that need
+  more capability than Luna. Mandatory Astra categories still win.
   Judge remaining work, not completed phases: administrative follow-through is
-  not review. Luna needs explicit mechanical work; implied intent and autonomous
-  investigation belong to Sol. Optimize total task cost including clarification
-  and correction turns, without scenario regexes or automatic opening floors.
+  not review. Implied intent and ordinary investigation alone do not require Sol.
+  Optimize total task cost including clarification and correction turns, without
+  scenario regexes or automatic opening floors.
   Every short ask receives one bounded preceding task and assistant proposal.
   The latest tool batch contributes counts and at most three excerpts, errors
   first. Replay and live routing share the same dossier builder.

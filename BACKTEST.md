@@ -15,6 +15,13 @@ usage are read from Codex session logs, re-classified by [Jev](https://docs.type
 (TypeSafe System One), and re-priced at published API rates under different
 routing policies.
 
+The result below is a historical GPT-5.6-era simulation. Current reruns use the
+GPT-6 Luna → Sol → Astra policy and current published short-context API rates:
+Luna $0.10/$0.50, Sol $2/$10, and Astra $10/$50 per million input/output tokens
+([OpenAI API pricing](https://developers.openai.com/api/docs/pricing)). The
+backtest script retains GPT-5.6 rates only to reproduce archived results and
+re-price old cached records; they are not used for current GPT-6 decisions.
+
 ## Protocol
 
 1. **Data** — one week of a daily-driver Codex installation: 237 user turns.

@@ -113,7 +113,7 @@ class CacheRegression(unittest.TestCase):
     def test_rotated_log_is_included_in_the_report_window(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "routes.jsonl"
-            line = json.dumps({"at": "2026-09-21T10:00:00", "model": j.TERRA}) + "\n"
+            line = json.dumps({"at": "2026-09-21T10:00:00", "model": "gpt-5.6-terra"}) + "\n"
             path.write_text(line)
             Path(str(path) + ".1").write_text(line)
             rows, stats = report_routing.load_entries(
@@ -121,16 +121,16 @@ class CacheRegression(unittest.TestCase):
             self.assertEqual(len(rows), 2)
             self.assertEqual(stats["lines"], 2)
 
-    def test_terra_swaps_and_cache_counters_do_not_depend_on_credit_prices(self):
+    def test_legacy_tier_swaps_and_cache_counters_do_not_depend_on_credit_prices(self):
         rows = [{"cache_scope": "fixture", "native": model, "attempts": [{
             "model": model, "usage": {"input_tokens": 1000, "cached_input_tokens": 500}
-        }]} for model in (j.SOL, j.TERRA, j.SOL)]
+        }]} for model in (j.SOL, "gpt-5.6-terra", j.SOL)]
         result = report_routing.prompt_cache_usage(rows)
         self.assertEqual(result["route_switches"], 2)
         self.assertEqual(result["model_revisits"], 1)
         self.assertEqual(result["observed_attempts"], 3)
         self.assertEqual(result["cached_input_tokens"], 1500)
-        self.assertIn(j.TERRA, result["by_model"])
+        self.assertIn("gpt-5.6-terra", result["by_model"])
 
 
 if __name__ == "__main__":

@@ -367,7 +367,6 @@ class TandemHandoff(unittest.TestCase):
         jev.native_dry = lambda: None
         jev.load_key = lambda: "fixture-key"
         for tier, depth, client_speed in ((jev.LUNA, "low", "priority"),
-                                         (jev.TERRA, "high", "priority"),
                                          (jev.LUNA, "medium", "fast"),
                                          (jev.SOL, "high", "priority"),
                                          (jev.ASTRA, "xhigh", "fast")):

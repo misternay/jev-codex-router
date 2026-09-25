@@ -6,8 +6,8 @@ Reads the live decision log written by `server/jev_server.py`
 `at`, `gate`, `tier`, `conf`, `depth`, `model`, `effort`, `speed`, `jev_ms`,
 `total_ms`, ...) and prints, over a window of N days:
 
-  - the distribution of the models/tiers served (luna / terra / sol / astra, plus the
-    Codex-dry tandem when it took over);
+  - the distribution of the current GPT-6 tiers served (luna / sol / astra), legacy
+    GPT-5.6 tiers in older logs, and the Codex-dry tandem when it took over;
   - the share of turns served by the cheapest tier (luna);
   - the gates the policy went through (`apply`, `hold(sol)`, `hold(luna_step)`,
     `codex_dry(...)`, ...);
@@ -24,17 +24,17 @@ Usage:
     python3 server/report_routing.py --days 30
     python3 server/report_routing.py --days 7 --json  # machine-readable
 
-Cost hypothesis (relative units, luna = 1)
+Cost hypothesis (relative units, GPT-6 Luna = 1)
 -------------------------------------------
-Legacy log entries carry no token counts. Alongside the observed-token
-credit estimates for new entries, the historical cost block estimates every served call with the *published list rates*
-(short context, Sep 2026 — the same table as `poc/backtest_savings.py`, itself
-matching BACKTEST.md) applied to a fixed token mix per turn, the mix measured in
-BACKTEST.md's 7-day replay (237 turns: 684M input, 98.3 % of it cached reads,
-1.6M output, i.e. ≈2.89M input / 6.8k output per turn, cached reads priced at
-10 % of input and cache writes at 1.25x):
+Legacy log entries carry no token counts. Alongside observed-token credit
+estimates for new entries, the historical cost block estimates every served call
+with the published short-context API rates (GPT-6 prices for current tiers and
+GPT-5.6 prices for older log entries) applied to a fixed token mix per turn. The
+mix comes from BACKTEST.md's 7-day replay (237 turns: 684M input, 98.3 % of it
+cached reads, 1.6M output, i.e. ≈2.89M input / 6.8k output per turn, cached reads
+priced at 10 % of input and cache writes at 1.25x):
 
-    astra $10.00/$50.00 · sol $4.00/$20.00 · luna $0.20/$1.20 (standard)
+    GPT-6 Astra $10.00/$50.00 · Sol $2.00/$10.00 · Luna $0.10/$0.50 (standard)
 
 One unit = one standard-speed luna turn. Historical Fast calls retain their
 API x2 multiplier according to the logged speed; changing the current policy
@@ -67,17 +67,21 @@ from routing_policy import POLICY_VERSION
 LIVE_LOG = os.path.join(STATE, "jev-router-live.jsonl")
 BACKTEST_STATE = os.path.join(STATE, "jev-backtest.json")
 
-LUNA, SOL, ASTRA = "gpt-5.6-luna", "gpt-5.6-sol", "gpt-6-astra"
-TERRA = "gpt-5.6-terra"
-NATIVE_TIERS = (LUNA, TERRA, SOL, ASTRA)
+LUNA, SOL, ASTRA = "gpt-6-luna", "gpt-6-sol", "gpt-6-astra"
+CURRENT_TIERS = (LUNA, SOL, ASTRA)
+LEGACY_TIERS = ("gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol")
+NATIVE_TIERS = (*CURRENT_TIERS, *LEGACY_TIERS)
 
 # Prices per 1M tokens (input, output, cached input, cache write), short context,
-# Sep 2026 — kept identical to poc/backtest_savings.py so the two tools agree.
+# as of 2026-09-24: https://developers.openai.com/api/docs/pricing
 PRICES = {
     ASTRA: (10.00, 50.00, 1.00, 12.50),
-    SOL: (4.00, 20.00, 0.40, 5.00),
+    SOL: (2.00, 10.00, 0.20, 2.50),
+    LUNA: (0.10, 0.50, 0.01, 0.125),
+    # Retain the published GPT-5.6 rates for historical log entries.
+    "gpt-5.6-sol": (4.00, 20.00, 0.40, 5.00),
     "gpt-5.6-terra": (2.00, 12.00, 0.20, 2.50),
-    LUNA: (0.20, 1.20, 0.02, 0.25),
+    "gpt-5.6-luna": (0.20, 1.20, 0.02, 0.25),
     # Codex-dry tandem (Go allowance), off-peak.
     "deepseek/deepseek-v4.1-flash": (0.15, 0.60, 0.015, 0.15),
 }
@@ -88,13 +92,15 @@ API_FAST_X = 2.0
 # 1,616,250 output tokens.
 MIX = {"input": 2_886_560, "cached": 2_836_607, "output": 6_819}
 
-# Short names of the native native model ladder, then the tandem family. Anything else is
-# reported under its own leaf name.
+# Short names of the current and historical native models, then the tandem
+# family. Anything else is reported under its own leaf name.
 SHORT = {
     LUNA: "luna",
-    TERRA: "terra",
     SOL: "sol",
     ASTRA: "astra",
+    "gpt-5.6-luna": "luna_5.6",
+    "gpt-5.6-terra": "terra_5.6",
+    "gpt-5.6-sol": "sol_5.6",
     "opencode-go/deepseek-v4.1-flash": "tandem",
     "deepseek/deepseek-v4.1-flash": "tandem",
     "opencode-go/glm-5.3-flash": "tandem",
@@ -103,11 +109,17 @@ CHEAPEST = LUNA
 # Threshold used by historical tier policies, not by current joint decisions.
 CONF_GATE = 0.5  # historical diagnostics only; joint routing has no confidence gate
 
-# Standard ChatGPT credit rates, 2026-09-20:
+# Standard ChatGPT credit rates, as of 2026-09-24:
 # https://learn.chatgpt.com/docs/pricing
 # (input, cached input, output) per million tokens. Reasoning is part of output.
-CREDIT_RATES = {LUNA: (5.0, 0.5, 30.0), SOL: (100.0, 10.0, 500.0),
-                ASTRA: (250.0, 25.0, 1250.0)}
+CREDIT_RATES = {
+    LUNA: (2.5, 0.25, 12.5), SOL: (50.0, 5.0, 250.0),
+    ASTRA: (250.0, 25.0, 1250.0),
+    # Historical GPT-5.6 credit rates remain available for old log entries.
+    "gpt-5.6-luna": (5.0, 0.5, 30.0),
+    "gpt-5.6-terra": (50.0, 5.0, 300.0),
+    "gpt-5.6-sol": (100.0, 10.0, 500.0),
+}
 
 
 def token_credits(model, usage):
@@ -383,7 +395,7 @@ def turn_cost(model, mix=None, speed="default"):
         return None
     mix = mix or MIX
     p_in, p_out, p_cached, p_write = PRICES[key]
-    if key in (LUNA, SOL, ASTRA, "gpt-5.6-terra") and speed in ("priority", "fast"):
+    if key in NATIVE_TIERS and speed in ("priority", "fast"):
         p_in, p_out, p_cached, p_write = (p_in * API_FAST_X, p_out * API_FAST_X,
                                         p_cached * API_FAST_X, p_write * API_FAST_X)
     cached = min(mix["cached"], mix["input"])

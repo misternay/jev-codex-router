@@ -99,7 +99,7 @@ from local_runtime import (
     STATE, LocalServer, append_private, authorized, local_secret, protect_logs,
 )
 
-from routing_policy import (ASTRA, EFFORTS, LUNA, POLICY_VERSION, QUESTIONS, SOL, TERRA,
+from routing_policy import (ASTRA, EFFORTS, LUNA, POLICY_VERSION, QUESTIONS, SOL,
                             TIERS, decision_from_answers, route)
 
 HOME = os.path.expanduser("~")
@@ -188,7 +188,12 @@ QUOTA_RX = re.compile(
 TERMINAL_EVENT_TYPES = ("response.completed", "response.incomplete", "response.failed")
 
 ERROR_RX = re.compile(
-    r"(?i)(traceback|error|failed|exit code [1-9]|assertion|exception|fatal|panic)")
+    r"(?im)(?:^\s*(?:traceback \(most recent call last\):"
+    r"|(?:[A-Za-z_][\w.]*(?:Error|Exception)|error|exception)\s*:"
+    r"|(?:fatal|panic|failed|failure|tests? failed)\s*:|errors?\b"
+    r"|(?:npm\s+)?ERR!|command failed\b"
+    r"|(?:process\s+)?exit(?:ed)?\s+(?:code|status)\s*[:=]?\s*[1-9]\d*\b)"
+    r"|\b(?:assertionerror|assertion failed)\b)")
 DIGEST_CHARS = 280
 INTENT_CHARS = 160
 
@@ -879,10 +884,13 @@ def _debug_shape(payload):
 
 
 ROUTE_GLYPHS = {
-    "gpt-5.6-luna": ("luna", "⚡"),      # cheap tier, adaptive thinking
-    "gpt-5.6-sol": ("sol", "🧠"),        # reasoning workhorse
+    "gpt-6-luna": ("luna", "⚡"),        # efficient tier, adaptive thinking
+    "gpt-6-sol": ("sol", "🧠"),          # coding and agentic workhorse
     "gpt-6-astra": ("astra", "🚀"),      # frontier
+    # Keep historical labels readable in old route logs.
+    "gpt-5.6-luna": ("luna", "⚡"),
     "gpt-5.6-terra": ("terra", "🌍"),
+    "gpt-5.6-sol": ("sol", "🧠"),
 }
 TANDEM_GLYPHS = {
     "deepseek-v4.1-flash": ("deepseek", "🐳"),  # Go standard (native dry)
