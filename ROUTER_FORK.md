@@ -19,9 +19,9 @@ Its source repository, `0xNatoshi/jev-codex-router`, is archived and read-only.
 
 - GitHub fork: `https://github.com/misternay/codex-router`
 - Jev integration branch: `jev-integration` (also the fork's `main`)
-- Jev integration merge: `65a89a8b` (upstream `main` at `6279f39d`)
-- Current fork revision: `bac46b24322cda609abd9aa3202770e1756824b3`
-- Merged into this embedded directory: 2026-09-25
+- Jev integration merge: `9ccb2d6c` (upstream `main` at `1e209887`)
+- Current fork revision: `9ccb2d6c3fc4fe8c634dbd7120760ba2fa54228c`
+- Merged into this embedded directory: 2026-10-01
 
 The integration branch preserves the original fork ancestry, carries the
 committed `router/` changes from this project, and merges upstream `main`.
