@@ -65,7 +65,7 @@ fi
 if [ -f "$state_dir/enabled-providers.json" ]; then
   "$router_dir/bin/install" --take-over-managed-router
 else
-  "$router_dir/install.sh" --no-provider --no-discovery --no-tray
+  "$router_dir/install.sh" --no-provider --no-tray
 fi
 
 if "$router_cli" providers generic show jev --json >/dev/null 2>&1; then

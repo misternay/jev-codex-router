@@ -66,12 +66,14 @@ launchctl bootout "gui/$(id -u)/io.0xnatoshi.jev-router" 2>/dev/null || true
 pkill -f "jev_server.py" 2>/dev/null || true
 sleep 1
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
-sleep 1.5
-if "$PYTHON" "$REPO/server/healthcheck.py"; then
-  echo ""
-  echo "— Jev Router service OK ($LABEL)"
-else
-  echo "Jev Router health check failed" >&2
-  exit 1
-fi
-echo "Uninstall: launchctl bootout gui/\$(id -u)/$LABEL"
+for i in {1..10}; do
+  if "$PYTHON" "$REPO/server/healthcheck.py"; then
+    echo ""
+    echo "— Jev Router service OK ($LABEL)"
+    echo "Uninstall: launchctl bootout gui/\$(id -u)/$LABEL"
+    exit 0
+  fi
+  sleep 1
+done
+echo "Jev Router health check failed" >&2
+exit 1

@@ -89,11 +89,17 @@ import json
 import os
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 import threading
 import time
 import urllib.request
+try:
+    import certifi
+    _SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
+except Exception:
+    _SSL_CONTEXT = None
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from local_runtime import (
     STATE, LocalServer, append_private, authorized, local_secret, protect_logs,
@@ -574,7 +580,7 @@ def call_jev(key, state, questions=None, timeout=4.0):
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
+    with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CONTEXT) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
