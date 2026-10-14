@@ -67,9 +67,9 @@ from routing_policy import POLICY_VERSION
 LIVE_LOG = os.path.join(STATE, "jev-router-live.jsonl")
 BACKTEST_STATE = os.path.join(STATE, "jev-backtest.json")
 
-LUNA, SOL, ASTRA = "gpt-6-luna", "gpt-6-sol", "gpt-6-astra"
+LUNA, SOL, ASTRA = "gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"
 CURRENT_TIERS = (LUNA, SOL, ASTRA)
-LEGACY_TIERS = ("gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol")
+LEGACY_TIERS = ("gpt-6-sol", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5.6-sol")
 NATIVE_TIERS = (*CURRENT_TIERS, *LEGACY_TIERS)
 
 # Prices per 1M tokens (input, output, cached input, cache write), short context,
@@ -77,6 +77,7 @@ NATIVE_TIERS = (*CURRENT_TIERS, *LEGACY_TIERS)
 PRICES = {
     ASTRA: (10.00, 50.00, 1.00, 12.50),
     SOL: (2.00, 10.00, 0.20, 2.50),
+    "gpt-6-sol": (2.00, 10.00, 0.20, 2.50),
     LUNA: (0.10, 0.50, 0.01, 0.125),
     # Retain the published GPT-5.6 rates for historical log entries.
     "gpt-5.6-sol": (4.00, 20.00, 0.40, 5.00),
@@ -98,6 +99,7 @@ SHORT = {
     LUNA: "luna",
     SOL: "sol",
     ASTRA: "astra",
+    "gpt-6-sol": "sol",
     "gpt-5.6-luna": "luna_5.6",
     "gpt-5.6-terra": "terra_5.6",
     "gpt-5.6-sol": "sol_5.6",
@@ -114,6 +116,7 @@ CONF_GATE = 0.5  # historical diagnostics only; joint routing has no confidence 
 # (input, cached input, output) per million tokens. Reasoning is part of output.
 CREDIT_RATES = {
     LUNA: (2.5, 0.25, 12.5), SOL: (50.0, 5.0, 250.0),
+    "gpt-6-sol": (50.0, 5.0, 250.0),
     ASTRA: (250.0, 25.0, 1250.0),
     # Historical GPT-5.6 credit rates remain available for old log entries.
     "gpt-5.6-luna": (5.0, 0.5, 30.0),

@@ -385,16 +385,22 @@ class TandemHandoff(unittest.TestCase):
                 sent = Edge.payloads[-1]
                 self.assertEqual(sent["model"], tier)
                 if tier == jev.ASTRA:
+                    expected_effort = "low"
+                elif tier == jev.LUNA:
+                    expected_effort = depth if depth in ("high", "max") else "high"
+                else:
+                    expected_effort = depth
+                if tier == jev.ASTRA:
                     self.assertEqual(sent["reasoning"], {
                         "effort": "max", "summary": "auto"
                     })
                     self.assertEqual(sent["input"][0], {
                         "type": "configuration_update",
-                        "reasoning": {"effort": depth},
+                        "reasoning": {"effort": expected_effort},
                     })
                 else:
                     self.assertEqual(sent["reasoning"], {
-                        "effort": depth, "summary": "auto"
+                        "effort": expected_effort, "summary": "auto"
                     })
                 self.assertEqual(sent["service_tier"], "default")
                 self.assertTrue(sent["stream"])

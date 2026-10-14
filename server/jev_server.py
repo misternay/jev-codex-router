@@ -885,7 +885,8 @@ def _debug_shape(payload):
 
 ROUTE_GLYPHS = {
     "gpt-6-luna": ("luna", "⚡"),        # efficient tier, adaptive thinking
-    "gpt-6-sol": ("sol", "🧠"),          # coding and agentic workhorse
+    "gpt-6.1-sol": ("sol", "🧠"),       # coding and agentic workhorse
+    "gpt-6-sol": ("sol", "🧠"),          # keep historical / fallback
     "gpt-6-astra": ("astra", "🚀"),      # frontier
     # Keep historical labels readable in old route logs.
     "gpt-5.6-luna": ("luna", "⚡"),

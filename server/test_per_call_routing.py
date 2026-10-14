@@ -349,16 +349,16 @@ class PerCallEndToEnd(unittest.TestCase):
 
     def test_astra_effort_uses_configuration_update_without_rewriting_base_effort(self):
         history = [message("user", "perform the final security review")]
-        sent = payload_for(history, reasoning={"effort": "low"})
+        sent = payload_for(history, reasoning={"effort": "high"})
         with mock.patch.object(
             jev, "call_jev_routed",
-            return_value=answer(jev.ASTRA, "high", astra_required=True),
+            return_value=answer(jev.ASTRA, "low", astra_required=True),
         ):
             self.call(sent)
         forwarded = Edge.payloads[-1]
-        self.assertEqual(forwarded["reasoning"]["effort"], "low")
+        self.assertEqual(forwarded["reasoning"]["effort"], "high")
         self.assertEqual(forwarded["input"][0], {
-            "type": "configuration_update", "reasoning": {"effort": "high"},
+            "type": "configuration_update", "reasoning": {"effort": "low"},
         })
         self.assertEqual(forwarded["input"][1:], history)
         self.assertEqual(self.records[-1]["effort_transport"], "configuration_update")

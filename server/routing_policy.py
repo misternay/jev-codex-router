@@ -2,7 +2,7 @@
 import math
 
 POLICY_VERSION = "split-v13-luna-max-general"
-LUNA, SOL, ASTRA = "gpt-6-luna", "gpt-6-sol", "gpt-6-astra"
+LUNA, SOL, ASTRA = "gpt-6-luna", "gpt-6.1-sol", "gpt-6-astra"
 TIERS = (LUNA, SOL, ASTRA)
 EFFORTS = ["low", "medium", "high", "xhigh", "max"]
 LEASES = ("one_call", "tool_chain", "user_turn")
@@ -89,9 +89,9 @@ QUESTIONS = {
     "effort": {
         "type": "choice",
         "instructions": (
-            "Choose sufficient reasoning depth for remaining work. Default ordinary general "
-            "work on Luna to max; explicit fixed mechanical work may use lower effort. For Sol "
-            "or Astra, choose depth appropriate to the remaining work."
+            "Choose sufficient reasoning depth for remaining work. For Luna, choose between "
+            "high and max (default ordinary general work to max; lower risk to high). For Astra, "
+            "low effort is used. For Sol, choose depth appropriate to the remaining work."
         ),
         "criteria": DEPTH_PROFILES,
     },
@@ -189,6 +189,10 @@ def decision_from_answers(answers):
         if probabilities is not None
     ]
     selected_model = ASTRA if astra_policy == "astra" else MODEL_IDS[model_choice]
+    if selected_model == ASTRA:
+        effort = "low"
+    elif selected_model == LUNA and effort not in ("high", "max"):
+        effort = "high"
     return {
         "model": selected_model,
         "base_model": MODEL_IDS[model_choice],

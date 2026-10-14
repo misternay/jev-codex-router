@@ -31,6 +31,7 @@ RESULT_PATH = os.path.expanduser("~/.codex/codex-router/jev-backtest.json")
 # https://developers.openai.com/api/docs/pricing
 PRICES = {
     "gpt-6-astra":   (10.00, 50.00, 1.00, 12.50),   # (input, output, cached_in, cache_write)
+    "gpt-6.1-sol":   (2.00, 10.00, 0.20, 2.50),
     "gpt-6-sol":     (2.00, 10.00, 0.20, 2.50),
     "gpt-6-luna":    (0.10, 0.50, 0.01, 0.125),
     # Kept for archived GPT-5.6 results and old cached records.
@@ -238,7 +239,7 @@ def main():
         f"{k.split('/')[-1]} ${v:.0f}" for k, v in sorted(scen.items(), key=lambda x: x[1])))
     print(f"full-Astra baseline: ${astra_all:.0f} (fixed token volume; not measured quota)")
     print("-" * 72)
-    for k in ("gpt-6-luna", "gpt-6-sol", "gpt-6-astra"):
+    for k in ("gpt-6-luna", "gpt-6.1-sol", "gpt-6-sol", "gpt-6-astra"):
         print(f"  {k:<14} {dist_counts.get(k,0):>4} turns · ${dist_costs.get(k,0):.2f}")
     print(f"result: {RESULT_PATH}")
     return 0

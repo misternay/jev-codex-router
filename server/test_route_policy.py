@@ -94,7 +94,13 @@ class SplitPolicy(unittest.TestCase):
                 self.assertEqual(result["model"], model)
                 self.assertEqual(result["base_model"], model)
                 self.assertEqual(result["astra_policy"], "normal")
-                self.assertEqual(result["effort"], effort)
+                if model == jev.ASTRA:
+                    expected_effort = "low"
+                elif model == jev.LUNA:
+                    expected_effort = effort if effort in ("high", "max") else "high"
+                else:
+                    expected_effort = effort
+                self.assertEqual(result["effort"], expected_effort)
                 self.assertEqual(result["lease"], "one_call")
                 self.assertEqual(result["confidence"], 0.12)
                 self.assertEqual(result["chosen_probability"], 0.4)
@@ -107,7 +113,7 @@ class SplitPolicy(unittest.TestCase):
         self.assertEqual(result["model"], jev.ASTRA)
         self.assertEqual(result["base_model"], jev.LUNA)
         self.assertEqual(result["astra_policy"], "astra")
-        self.assertEqual(result["effort"], "high")
+        self.assertEqual(result["effort"], "low")
         self.assertEqual(result["gate"], "astra_policy")
 
     def test_invalid_choices_cannot_become_an_unrequested_pair(self):
@@ -161,6 +167,23 @@ class SplitPolicy(unittest.TestCase):
             result = decision_from_answers(answer)
             self.assertIsNone(result["confidence"])
             self.assertEqual(result["model"], jev.LUNA)
+
+    def test_effort_enforcement_for_luna_and_astra(self):
+        # Astra is strictly low effort regardless of Jev's suggestion
+        for depth in jev.EFFORTS:
+            res = decision_from_answers(self.answer(jev.ASTRA, depth))
+            self.assertEqual(res["effort"], "low")
+
+        # Luna allows max or high; other depths clamp to high
+        self.assertEqual(decision_from_answers(self.answer(jev.LUNA, "max"))["effort"], "max")
+        self.assertEqual(decision_from_answers(self.answer(jev.LUNA, "high"))["effort"], "high")
+        self.assertEqual(decision_from_answers(self.answer(jev.LUNA, "medium"))["effort"], "high")
+        self.assertEqual(decision_from_answers(self.answer(jev.LUNA, "low"))["effort"], "high")
+
+        # Sol retains Jev's chosen effort
+        for depth in jev.EFFORTS:
+            res = decision_from_answers(self.answer(jev.SOL, depth))
+            self.assertEqual(res["effort"], depth)
 
 
 if __name__ == "__main__":
